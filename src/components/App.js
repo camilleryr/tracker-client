@@ -2,12 +2,16 @@ import React, { Component } from "react";
 import AnimatedMap from "./AnimatedMap";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "../css/App.css";
+import TrackerPieChart from "./TrackerPieChart";
+import TrackerLineGraph from "./TrackerLineGraph";
+
 
 class App extends Component {
   state = {
     apiResponse: null,
     values: [],
     cordArray: [[0,0]],
+    firebaseData: null,
     geojson: {
       type: "FeatureCollection",
       features: [
@@ -46,7 +50,7 @@ class App extends Component {
 
   }
 
-  setCordArray = (firebaseLocation = "-L75bqpa9c1m_92jzDHd") => {
+  setCordArray = (firebaseLocation = "-L84VmgCGE-tky50AIL7") => {
     fetch(`https://trackmyrun-41804.firebaseio.com/${firebaseLocation}.json`)
       .then(r => r.json())
       .then(data => {
@@ -70,6 +74,7 @@ class App extends Component {
           ]
         };
         this.setState({
+          firebaseData: data,
           cordArray: _cordArray,
           geojson: _geojson
         });
@@ -86,10 +91,17 @@ class App extends Component {
   }
 
   render() {
+    const _data = [{name: 0, value: 0}, {name: 1, value: 0},
+    {name: 2, value: 0}, {name: 3, value: 0}, {name: 4, value: 0}]
+
+    this.state.values.forEach(x => {
+      _data[x.count].value ++
+    })
     return (
       <div className="App">
         <AnimatedMap cordArray={this.state.cordArray} geojson={this.state.geojson} timer={0}/>
-        {/* <button onClick={this.handleClick}>Test</button> */}
+        <TrackerPieChart data={_data}/>
+        <TrackerLineGraph data={this.state.firebaseData}/>
         <CalendarHeatmap
           onClick={value => {this.setCordArray(value.firebaseLocation)}}
           values={this.state.values}
