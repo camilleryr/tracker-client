@@ -1,17 +1,22 @@
 import React, { Component } from "react";
 import AnimatedMap from "./AnimatedMap";
 import CalendarHeatmap from "react-calendar-heatmap";
-import "../css/App.css";
 import TrackerPieChart from "./TrackerPieChart";
 import TrackerLineGraph from "./TrackerLineGraph";
-
+import { Grid, Row, Col } from "react-bootstrap";
+import "../css/App.css";
+import "../css/HeatMap.css";
+import Sidebar from "./Sidebar";
+import {toTwoPoints} from "./Helpers";
 
 class App extends Component {
   state = {
     apiResponse: null,
+    cordArray: [[0, 0]],
     values: [],
-    cordArray: [[0,0]],
     firebaseData: null,
+    selectedAPILocation: null,
+    selected: null,
     geojson: {
       type: "FeatureCollection",
       features: [
@@ -19,39 +24,49 @@ class App extends Component {
           type: "Feature",
           geometry: {
             type: "LineString",
-            coordinates: [0,0]
+            coordinates: [0, 0]
           }
         }
       ]
-    }
+    },
+    heatmapData: [
+      { name: 0, value: 0 },
+      { name: 1, value: 0 },
+      { name: 2, value: 0 },
+      { name: 3, value: 0 },
+      { name: 4, value: 0 }
+    ]
   };
 
-  componentDidMount() {
+  componentWillMount() {
     fetch("http://danko.mit.edu/api/activities")
       .then(x => x.json())
       .then(y => {
-
-        let longestDistance = y.map(x => x.distance).sort((a,b) => b-a)[0]
+        let longestDistance = y.map(x => x.distance).sort((a, b) => b - a)[0];
 
         let _values = y.map(x => {
-          let z = x.distance / longestDistance
+          let z = x.distance / longestDistance;
+          // debugger
           return {
-            "date":x.startTime.substring(0,10),
-            "count": ((z < .2) ? 0
-                    : (z < .4) ? 1
-                    : (z < .6) ? 2
-                    : (z < .8) ? 3
-                               : 4),
-            "firebaseLocation": x.firebaseLocation
-          }})
-          
-        this.setState({ apiResponse: y, values:_values });
-      });
+            date: x.startTime.substring(0, 10),
+            count: z < 0.2 ? 0 : z < 0.4 ? 1 : z < 0.6 ? 2 : z < 0.8 ? 3 : 4,
+            firebaseLocation: x.firebaseLocation,
+            apiLocation: x.id
+          };
+        });
 
+        let _heatmapData = Object.assign([], this.state.heatmapData)
+
+        _values.forEach(x => {
+          _heatmapData[x.count].value++;
+        });
+        this.setState({ apiResponse: y, values: _values , heatmapData:_heatmapData});
+        this.setCordArray();
+      });
   }
 
-  setCordArray = (firebaseLocation = "-L84VmgCGE-tky50AIL7") => {
-    fetch(`https://trackmyrun-41804.firebaseio.com/${firebaseLocation}.json`)
+  setCordArray = (value = this.state.values[this.state.values.length-1]) => {
+    fetch(`https://trackmyrun-41804.firebaseio.com/${value.firebaseLocation}.json`)
       .then(r => r.json())
       .then(data => {
         let _cordArray = data
@@ -73,45 +88,83 @@ class App extends Component {
             }
           ]
         };
+
         this.setState({
           firebaseData: data,
           cordArray: _cordArray,
-          geojson: _geojson
+          geojson: _geojson,
+          selectedHeatValue: value.count,
+          selected: this.state.apiResponse.find(x => x.id === value.apiLocation)
         });
       });
   };
 
-  handleClick = () => {
-    console.log("click")
-    this.setCordArray("-L7maugvTaJnQd-kHmLl")
-  }
+  handleClick = (value) => {
+    console.log("click");
+    if(value){
+      this.setCordArray(value);
+    }
+  };
 
-  componentWillMount() {
-    this.setCordArray()
+  RenderText = () => {
+    if(this.state.selected){
+      return (
+        <h4 className="dashboard--description">
+        Date : {this.state.selected.startTime.substring(0,10)} | 
+        Distance : {toTwoPoints(this.state.selected.distance)} | 
+        Pace : {toTwoPoints(this.state.selected.pace)}
+        </h4>
+      )
+    }
   }
 
   render() {
-    const _data = [{name: 0, value: 0}, {name: 1, value: 0},
-    {name: 2, value: 0}, {name: 3, value: 0}, {name: 4, value: 0}]
-
-    this.state.values.forEach(x => {
-      _data[x.count].value ++
-    })
     return (
-      <div className="App">
-        <AnimatedMap cordArray={this.state.cordArray} geojson={this.state.geojson} timer={0}/>
-        <TrackerPieChart data={_data}/>
-        <TrackerLineGraph data={this.state.firebaseData}/>
-        <CalendarHeatmap
-          onClick={value => {this.setCordArray(value.firebaseLocation)}}
-          values={this.state.values}
-          classForValue={value => {
-            if (!value) {
-              return "color-empty";
-            }
-            return `color-scale-${value.count}`;
-          }}
-        />
+      <div className="dashboard">
+      <Sidebar />
+        <Grid className="dashboard--grid" fluid>
+          <Row>
+            <Col md={8}>
+              <AnimatedMap
+                className="dashboard--animatedMap"
+                cordArray={this.state.cordArray}
+                geojson={this.state.geojson}
+                timer={0}
+              />
+            </Col>
+          </Row>
+
+          <Row className="bottomRow">
+            <Col md={4}>
+              <div className="dashboard--lineGraph">
+                <TrackerLineGraph data={this.state.firebaseData} />
+              </div>
+            </Col>
+
+            <Col md={6}>
+              <div className="dashboard--heatmap">
+                <CalendarHeatmap
+                  onClick={value => this.handleClick(value)}
+                  values={this.state.values}
+                  classForValue={value => {
+                    if (!value) {
+                      return "color-empty";
+                    }
+                    return `color-scale-${value.count}`;
+                  }}
+                />
+              </div>
+
+              {this.RenderText()}
+
+            </Col>
+            <Col md={2}>
+              <div className="dashboard--pieChart">
+                <TrackerPieChart data={this.state.heatmapData} heatValue={this.state.selectedHeatValue}/>
+              </div>
+            </Col>
+          </Row>
+        </Grid>
       </div>
     );
   }

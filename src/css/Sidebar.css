@@ -1,0 +1,33 @@
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    max-width: 120px;
+    min-height: 100vh;
+    background: #323432;
+    color: #fff;
+}
+
+.sidebar-block{
+    position: absolute;
+    height: 125px;
+    width: 102px;
+    background-color: black;
+    border-radius: 5px;
+    top: 28px;
+    left: 21px;
+}
+
+.sidebar-header{
+    position: absolute;
+    bottom: 125px;
+    left: -94px;
+
+    -webkit-transform: rotate(-90deg); 
+    -moz-transform: rotate(-90deg);	
+}
+
+h3{
+    font-size: 50px;
+}

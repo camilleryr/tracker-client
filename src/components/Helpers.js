@@ -1,3 +1,6 @@
+export function toTwoPoints(double) {
+    return (Math.floor(double*10))/10
+}
 
 export function setLineChartData(cordsArray) {
     
@@ -36,9 +39,9 @@ export function setLineChartData(cordsArray) {
         
         returnArray.push({
             name:`Point ${index}`,
-            distance: totalDistance,
-            altitude: _altitude,
-            speed: _speed 
+            distance: (Math.floor(totalDistance*100))/100,
+            altitude: (Math.floor(_altitude*100))/100,
+            speed: (Math.floor(_speed*100))/100
         })
     })
     return returnArray

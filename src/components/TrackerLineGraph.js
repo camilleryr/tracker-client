@@ -19,15 +19,18 @@ class TrackerLineGraph extends Component {
     componentWillReceiveProps(nextProps) {
         this.setState({data: setLineChartData(nextProps.data)})
     }
-
+    
+    componentDidMount() {
+        this.setState({data: setLineChartData(this.props.data)})
+    }
   render() {
       let data = this.state.data
 
       if(data){
           return (
             <LineChart
-              width={600}
-              height={300}
+              width={500}
+              height={250}
               data={data}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >

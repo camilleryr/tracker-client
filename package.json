@@ -8,6 +8,7 @@
     "luma.gl": "^5.0.0",
     "mapbox-gl": "^0.44.1",
     "react": "^16.2.0",
+    "react-bootstrap": "^0.32.1",
     "react-calendar-heatmap": "^1.6.3",
     "react-dom": "^16.2.0",
     "react-map-gl": "^3.2.5",
