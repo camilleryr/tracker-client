@@ -31,3 +31,8 @@
 h3{
     font-size: 50px;
 }
+
+.sidebar-logo {
+    width: 80px;
+    margin: 20px 10px;
+}
