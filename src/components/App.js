@@ -124,7 +124,7 @@ class App extends Component {
       <Sidebar />
         <Grid className="dashboard--grid" fluid>
           <Row>
-            <Col md={8}>
+            <Col md={12}>
               <AnimatedMap
                 className="dashboard--animatedMap"
                 cordArray={this.state.cordArray}
@@ -135,13 +135,13 @@ class App extends Component {
           </Row>
 
           <Row className="bottomRow">
-            <Col md={4}>
+            <Col md={3}>
               <div className="dashboard--lineGraph">
                 <TrackerLineGraph data={this.state.firebaseData} />
               </div>
             </Col>
 
-            <Col md={6}>
+            <Col md={7}>
               <div className="dashboard--heatmap">
                 <CalendarHeatmap
                   onClick={value => this.handleClick(value)}

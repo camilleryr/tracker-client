@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import DeckGL, {PolygonLayer} from 'deck.gl';
-import TripsLayer from './trips-layer';
+import React, { Component } from "react";
+import DeckGL, { PolygonLayer } from "deck.gl";
+import TripsLayer from "./trips-layer";
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],
@@ -14,17 +14,25 @@ const LIGHT_SETTINGS = {
 export default class DeckGLOverlay extends Component {
   static get defaultViewport() {
     return {
-      longitude: -86.69890638832555,
-      latitude: 36.186592101764056,
-      zoom: 14.5,
+      altitude: 1.5,
+      bearing: -45,
+      height: 1080,
+      latitude: 36.18854503621826,
+      longitude: -86.69670671995104,
+      maxPitch: 60,
       maxZoom: 16,
+      minPitch: 0,
+      minZoom: 0,
+
       pitch: 45,
-      bearing: -45
+      transitionDuration: 0,
+      width: 1920,
+      zoom: 15.187346060709192
     };
   }
 
   render() {
-    const {viewport, buildings, trips, trailLength, time} = this.props;
+    const { viewport, buildings, trips, trailLength, time } = this.props;
 
     if (!buildings || !trips) {
       return null;
@@ -32,7 +40,7 @@ export default class DeckGLOverlay extends Component {
 
     const layers = [
       new TripsLayer({
-        id: 'trips',
+        id: "trips",
         data: trips,
         getPath: d => d.segments,
         getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
