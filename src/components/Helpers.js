@@ -12,7 +12,7 @@ export function setLineChartData(cordsArray) {
     let startTime = cordsArray[0].timestamp
     
     let segmentLength = Math.floor(cordsArray.length / 12)
-    
+
     let segmentedArray = []
     do{
         segmentedArray.push(cordsArray.splice(0, segmentLength))

@@ -14,11 +14,11 @@ class AnimatedMap extends React.Component {
     super(props);
     this.state = {
       viewport: {
-        latitude: 36.20317184193212,
-        longitude: -86.7017887571744,
-        zoom: 14,
-        width: 1240,
-        height: 300,
+        latitude: 36.19040514343143,
+        longitude: -86.69760664018014,
+        zoom: 16,
+        width: 1375,
+        height: 525,
         startDragLngLat: null,
         isDragging: null,
         pitch: 60,
