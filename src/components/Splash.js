@@ -10,7 +10,7 @@ class Splash extends Component {
         return (
             <div className="Splash">
                 <DeckGLOverlayMap className="deckGLMap"/>   
-                <Link className="enterButton" to="/Visualize">
+                <Link className="enterButton" to="/tracker-client/Visualize">
                     <div>ENTER</div>
                 </Link>
             </div>
