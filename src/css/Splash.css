@@ -1,4 +1,5 @@
 .enterButton {
+    transition: all 0.5s ease;
     position: absolute;
     z-index: 100;
     width: 400px;
@@ -9,10 +10,16 @@
     left: 50px;
     text-align: center;
     line-height: 2.6;
-    font-size: 39px;
+    font-size: 53px;
     text-decoration: none;
     color: white;
     box-shadow: 5px 5px 30px #888888;
+}
+
+.enterButton:hover{
+        color: white;
+        letter-spacing: 13px;
+        text-decoration: underline;
 }
 
 .deckGLMap {
