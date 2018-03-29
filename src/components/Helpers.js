@@ -8,8 +8,10 @@ export function setLineChartData(cordsArray) {
         return null 
     }
 
+    cordsArray = cordsArray.reverse()
+
     let totalDistance = 0
-    let startTime = cordsArray[0].timestamp
+    let startTime = cordsArray[cordsArray.length-1].timestamp
     
     let segmentLength = Math.floor(cordsArray.length / 12)
 
@@ -32,7 +34,7 @@ export function setLineChartData(cordsArray) {
 
         let arrayLength = segment.length
         let _altitude = segment.reduce((accumulator, currentValue) => accumulator + currentValue.coords.altitude, 0) / arrayLength
-        let segmentTime = ((segment[0].timestamp - segment[segment.length-1].timestamp)/3600000)
+        let segmentTime = ((segment[segment.length-1].timestamp - segment[0].timestamp)/3600000)
         let _speed = segmentDistance / segmentTime
         
         totalDistance += segmentDistance
