@@ -27,7 +27,7 @@ background-color: #323432;
   margin-top: 35px;
 }
 
-.dashboard--description {
+.dashboard--description,  .heatmap--text {
   color: #fd805d;
   font-size: 1.3em;
   text-align: center;

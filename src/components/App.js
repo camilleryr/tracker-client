@@ -7,10 +7,11 @@ import { Grid, Row, Col } from "react-bootstrap";
 import "../css/App.css";
 import "../css/HeatMap.css";
 import Sidebar from "./Sidebar";
-import {toTwoPoints} from "./Helpers";
+import { toTwoPoints } from "./Helpers";
 
 class App extends Component {
   state = {
+    heatMapQuantifier: "distance",
     apiResponse: null,
     cordArray: [[0, 0]],
     values: [],
@@ -38,35 +39,50 @@ class App extends Component {
     ]
   };
 
+  generateHeatmapData = (onLoad = false) => {
+    let sortedArray = this.state.apiResponse
+      .map(x => x[this.state.heatMapQuantifier])
+      .sort((a, b) => b - a);
+    let min = sortedArray[sortedArray.length - 1];
+    let max = sortedArray[0];
+    let difference = max - min;
+
+    let _values = this.state.apiResponse.map(x => {
+      let z = (x[this.state.heatMapQuantifier] - min) / difference;
+      // debugger
+      return {
+        date: x.startTime.substring(0, 10),
+        count: z < 0.2 ? 0 : z < 0.4 ? 1 : z < 0.6 ? 2 : z < 0.8 ? 3 : 4,
+        firebaseLocation: x.firebaseLocation,
+        apiLocation: x.id
+      };
+    });
+
+    let _heatmapData = Object.assign([], this.state.heatmapData);
+
+    _values.forEach(x => {
+      _heatmapData[x.count].value++;
+    });
+    
+    this.setState({ values: _values, heatmapData: _heatmapData }, () => {
+      if(onLoad) {this.setCordArray()};
+    });
+  };
+
   componentWillMount() {
     fetch("http://danko.mit.edu/api/activities")
       .then(x => x.json())
       .then(y => {
-        let longestDistance = y.map(x => x.distance).sort((a, b) => b - a)[0];
-
-        let _values = y.map(x => {
-          let z = x.distance / longestDistance;
-          // debugger
-          return {
-            date: x.startTime.substring(0, 10),
-            count: z < 0.2 ? 0 : z < 0.4 ? 1 : z < 0.6 ? 2 : z < 0.8 ? 3 : 4,
-            firebaseLocation: x.firebaseLocation,
-            apiLocation: x.id
-          };
+        this.setState({ apiResponse: y }, () => {
+          this.generateHeatmapData(true);
         });
-
-        let _heatmapData = Object.assign([], this.state.heatmapData)
-
-        _values.forEach(x => {
-          _heatmapData[x.count].value++;
-        });
-        this.setState({ apiResponse: y, values: _values , heatmapData:_heatmapData});
-        this.setCordArray();
       });
   }
 
-  setCordArray = (value = this.state.values[this.state.values.length-1]) => {
-    fetch(`https://trackmyrun-41804.firebaseio.com/${value.firebaseLocation}.json`)
+  setCordArray = (value = this.state.values[this.state.values.length - 1]) => {
+    fetch(
+      `https://trackmyrun-41804.firebaseio.com/${value.firebaseLocation}.json`
+    )
       .then(r => r.json())
       .then(data => {
         let _cordArray = data
@@ -99,29 +115,33 @@ class App extends Component {
       });
   };
 
-  handleClick = (value) => {
+  onRadioChange = event => {
+    this.setState({heatMapQuantifier: event.target.value}, this.generateHeatmapData())
+  }
+
+  handleClick = value => {
     console.log("click");
-    if(value){
+    if (value) {
       this.setCordArray(value);
     }
   };
 
   RenderText = () => {
-    if(this.state.selected){
+    if (this.state.selected) {
       return (
         <h4 className="dashboard--description">
-        Date : {this.state.selected.startTime.substring(0,10)} | 
-        Distance : {toTwoPoints(this.state.selected.distance)} | 
-        Pace : {toTwoPoints(this.state.selected.pace)}
+          Date : {this.state.selected.startTime.substring(0, 10)} | Distance :{" "}
+          {toTwoPoints(this.state.selected.distance)} | Pace :{" "}
+          {toTwoPoints(this.state.selected.pace)}
         </h4>
-      )
+      );
     }
-  }
+  };
 
   render() {
     return (
       <div className="dashboard">
-      <Sidebar />
+        <Sidebar />
         <Grid className="dashboard--grid" fluid>
           <Row>
             <Col md={12}>
@@ -143,6 +163,22 @@ class App extends Component {
 
             <Col md={7}>
               <div className="dashboard--heatmap">
+                <span className="heatmap--text">Distace :&nbsp;</span>
+                <input
+                  type="radio"
+                  name="Distance"
+                  value="distance"
+                  checked={this.state.heatMapQuantifier === "distance"}
+                  onChange={event => this.onRadioChange(event)}
+                />
+                <span className="heatmap--text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pace :&nbsp;</span>
+                <input
+                  type="radio"
+                  name="Pace"
+                  value="pace"
+                  checked={this.state.heatMapQuantifier === "pace"}
+                  onChange={event => this.onRadioChange(event)}
+                />
                 <CalendarHeatmap
                   onClick={value => this.handleClick(value)}
                   values={this.state.values}
@@ -156,11 +192,13 @@ class App extends Component {
               </div>
 
               {this.RenderText()}
-
             </Col>
             <Col md={2}>
               <div className="dashboard--pieChart">
-                <TrackerPieChart data={this.state.heatmapData} heatValue={this.state.selectedHeatValue}/>
+                <TrackerPieChart
+                  data={this.state.heatmapData}
+                  heatValue={this.state.selectedHeatValue}
+                />
               </div>
             </Col>
           </Row>

@@ -8,46 +8,45 @@ export function setLineChartData(cordsArray) {
         return null 
     }
 
-    cordsArray = cordsArray.reverse()
-
     let totalDistance = 0
-    let startTime = cordsArray[cordsArray.length-1].timestamp
+    let startTime = cordsArray[0].timestamp
     
-    let segmentLength = Math.floor(cordsArray.length / 12)
-
-    let segmentedArray = []
-    do{
-        segmentedArray.push(cordsArray.splice(0, segmentLength))
-    } while (cordsArray.length > 0)
-    
-    let returnArray = []
-    
-    segmentedArray.forEach((segment,index) => {
+    return breakApartCoordArray(cordsArray).map((segment,index) => {
         
-        let segmentDistance = 0
-
-        for (let index = 0; index < segment.length-1; index++) {
-            let a = segment[index].coords
-            let b = segment[index+1].coords
-            segmentDistance += _distance(a.latitude, a.longitude, b.latitude, b.longitude)
-        }
+        let segmentDistance = segment.reduce( (total, currentValue, currentIndex, arr) => {
+            return total + ((currentIndex === arr.length-1) 
+                ? 0
+                : _distance(currentValue.coords.latitude, currentValue.coords.longitude, arr[currentIndex+1].coords.latitude, arr[currentIndex+1].coords.longitude))
+        }, 0 )
 
         let arrayLength = segment.length
         let _altitude = segment.reduce((accumulator, currentValue) => accumulator + currentValue.coords.altitude, 0) / arrayLength
+
         let segmentTime = ((segment[segment.length-1].timestamp - segment[0].timestamp)/3600000)
         let _speed = segmentDistance / segmentTime
         
         totalDistance += segmentDistance
         
-        returnArray.push({
+        return {
             name:`Point ${index}`,
-            distance: (Math.floor(totalDistance*100))/100,
-            altitude: (Math.floor(_altitude*100))/100,
-            speed: (Math.floor(_speed*100))/100
-        })
+            distance: toTwoPoints(totalDistance),
+            altitude: toTwoPoints(_altitude),
+            speed: toTwoPoints(_speed)
+        }
     })
-    return returnArray
 };
+
+function breakApartCoordArray (cordsArray) {
+    cordsArray = cordsArray.sort((a,b) => a.timestamp - b.timestamp)
+
+    let segmentLength = Math.floor(cordsArray.length / 12)
+
+    let _cordsArray = Object.assign([], cordsArray)
+
+    return [...Array(12).keys()].map(x => 
+        _cordsArray.splice(0, segmentLength + ( cordsArray.length % segmentLength > x ? 1 : 0 ))
+    ) 
+}
 
 function _distance(lat1, lon1, lat2, lon2) {
     var radlat1 = Math.PI * lat1/180
