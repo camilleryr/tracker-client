@@ -6,4 +6,4 @@ You can find the most recent version of this guide [here](https://github.com/fac
 # ChrisTracker Desktop Client
 Dektop client for [ChrisTracker](https://github.com/camilleryr/ChrisTracker)
 
-Check out the live site [here](http://chrismiller.club/tracker-cleint/)
+Check out the live site [here](http://chrismiller.club/tracker-client/)
